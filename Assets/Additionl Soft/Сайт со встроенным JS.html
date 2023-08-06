@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html>
+<!-- Некотырый функционал сайта неработает без интернет подключения и хостинга, так как использует сторннние библиотеки и сервися. Хостингом может являться OSPanel(Open Server), Brakets Live, PyCharm Live и также платные хостинги, такие как InterServer. В случае отсутсвия хостинга смена языков и использование cookie не будет доступным. Также не будут работь библиотека конвертации валют.-->
+<!--const newUrl = '/new-url';
+const newTitle = 'New Page Title';
+const newStateObj = { foo: 'bar' };
+window.history.pushState(newStateObj, newTitle, newUrl);-->
+
+<head>
+	<title>BelMarwin</title>
+	<link rel="stylesheet" type="text/css" href="CSS/style.css">
+	<script src="https://www.cbr-xml-daily.ru/money.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
+	<script>
+		let country = "Беларусь";
+		let oblast = "";
+		let city = "";
+		let street = "";
+		let house = "";
+		let mail = "";
+		let mailIndex = "";
+	</script>
+</head>
+
+<body>
+	<script type="text/javascript">
+		function googleTranslateElementInit() {
+			new google.translate.TranslateElement({
+				pageLanguage: 'be'
+			}, 'google_translate_element');
+		}
+	</script>
+	<div id="google_translate_element" style="display: none">
+		
+	</div>
+	<div class="MB-Basket">
+		<div class="Main-Basket">
+			<div class="Main-BasketName">
+				<button class="CloseBasket" onclick="closeBasket()"><img src="Assets/Images/close.png"></button>
+				<label class="nameBasket2">
+					<h2>Кошык</h2></label>
+				<label class="basketEmpty">
+					<h2>Кошык пуст</h2>
+					<div class="goBuyingProducts">
+						<button><a href="index.html">Па пакупкі</a></button>
+					</div>
+				</label>
+			</div>
+			<div class="Products-MainBasket"> </div>
+			<div class="Summurised_Description_ProductBasket">
+				<ul>
+					<li>
+						<label id="common-cost">Выніковая каштоўнасць:</label>
+					</li>
+					<li>
+						<label id="common-count">Агульная колькасць тавараў:</label>
+					</li>
+					<li>
+						<button onclick="confirmUserOrder();" class="confirmOrder">Пацвердзіць і аплаціць пакупкі</button>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="confirmationPage">
+		<div class="confirmationPageOutline">
+			<form id="orderForm" method="POST" action="sendOrder.php">
+				<div class="orderMainName">
+					<h1>Афармленне замовы</h1> </div>
+				<div class="productToOrder">
+					<label class="containerNames-order">Заказаныя тавары: </label>
+					<ul class="productToOrderUl"></ul>
+				</div>
+				<div class="pointIssue">
+					<label class="containerNames-order">Пункт дастаўкі і выдачы</label>
+					<button type="button" onclick="changeIPLocation();" class="changePointIssue">Выбраць месцазнаходжанне ▼</button>
+				</div>
+				<div class="orderPaymentMethon">
+					<label class="containerNames-order">Спосабы аплаты</label>
+					<button type="button" onclick="openPays();" class="changeOrderPaymentMethon">Выбар спосабу аплаты</button>
+				</div>
+				<div class="userInfo">
+					<label class="containerNames-order">Пакупнік</label>
+					<input name="numberS" type="tel" required maxlength="14" id="orderPhoneNumber" placeholder="Нумар тэлефона: ">
+					<input name="emailS" type="email" required id="orderEmail" placeholder="Адрас электроннай пошты: ">
+					<input name="nameS" required id="orderName" placeholder="ПІБ: "> </div>
+				<button type="submit" id="confirmOrderSubmit">Завяршыць</button>
+				<button onclick="cancelUserOrder();" type="reset" id="cancelOrderSubmit">Адмяніць</button>
+			</form>
+		</div>
+	</div>
+	<script type="text/javascript" src="JS/orderValidater.js"></script>
+	<script type="text/javascript" src="JS/getProductList.js"></script>
+	<script type="text/javascript">
+		var countryCode = '+375';
+		$(document).ready(function () {
+			document.querySelector("#orderPhoneNumber").maxlenght = countryCode.length + "(999)999-9999".length;
+			$("#orderPhoneNumber").mask(`${countryCode}(999)999-999`);
+		});
+	</script>
+	<script type="text/javascript">
+		function changeIPLocation() {
+			if (mailIndex == "") {
+				document.querySelector(".place-container").style.display = "block";
+			}
+			else {
+				let address = document.createElement("label");
+				address.htmlFor = "adressOrder";
+				address.textContent = `Краіна: ${country}, Край: ${oblast}, Горад: ${city}, Вуліца: ${street}, Дом: ${house}, Пошта: ${mail}, Паштовы індэкс: ${mailIndex}`;
+				if (document.querySelectorAll(".pointIssue label").length <= 1) {
+					document.querySelector(".pointIssue").appendChild(address)
+				}
+			}
+		}
+	</script>
+	<script type="text/javascript">
+		function updateProductSummary() {
+			let common_cost = document.getElementById("common-cost");
+			let common_count = document.getElementById("common-count");
+			let sumCost = 0;
+			let sumCount = 0;
+			document.querySelectorAll("label[for='Cost']").forEach(label => {
+				sumCost += Number(label.cost);
+			});
+			document.querySelectorAll(".basket-quantity-val").forEach(quantity => {
+				sumCount += Number(quantity.value);
+			});
+			document.querySelector(".displayProductCounter").textContent = sumCount;
+			common_cost.textContent = "Выніковая цана: " + (sumCost).toFixed(2);
+			common_count.textContent = "Агульная колькасць тавараў: " + sumCount;
+		}
+
+		function closeBasket() {
+			document.getElementsByClassName("MB-Basket").item(0).style.display = "none";
+			document.querySelector('footer').style = 'display: block';
+		}
+
+		function removeItem(element) {
+			let val = document.getElementsByClassName("basket-quantity-val");
+			if (val.item(element) == null) {
+				if (val.item(element - 1).value != "0") {
+					val.item(element - 1).value = Number(val.item(element - 1).value) - 1;
+					let basketElement = document.querySelectorAll(".DescriptionProductBasket ul").item(element - 1);
+					let adderButton = document.getElementsByClassName("buy-product-button").item(element - 1);
+					let cost = adderButton.getAttribute("data-product-price");
+					basketElement.querySelector("label[for='Cost']").textContent = "Цана: " + (Number(val.item(element - 1).value) * Number(cost)).toFixed(2);
+					basketElement.querySelector("label[for='Cost']").cost = (Number(val.item(element - 1).value) * Number(cost)).toFixed(2);
+					updateProductSummary();
+					if (val.item(element - 1).value == "0") {
+						let notAddToBasketVar = document.createElement("li");
+						notAddToBasketVar.textContent = "Не дадаваць у замову";
+						let secondListItem = basketElement.querySelectorAll("li").item(2);
+						basketElement.querySelector("label[for='Cost']").textContent = "Цана: 0";
+						basketElement.insertBefore(notAddToBasketVar, secondListItem.nextSibling);
+						updateProductSummary();
+						if (notAddToBasketVar) {
+							return
+						}
+					}
+				}
+			}
+			else {
+				if (val.item(element).value != "0") {
+					val.item(element).value = Number(val.item(element).value) - 1;
+					let basketElement = document.querySelectorAll(".DescriptionProductBasket ul").item(element);
+					let adderButton = document.getElementsByClassName("buy-product-button").item(element);
+					let cost = adderButton.getAttribute("data-product-price");
+					basketElement.querySelector("label[for='Cost']").textContent = "Цана: " + (Number(val.item(element).value) * Number(cost)).toFixed(2);
+					basketElement.querySelector("label[for='Cost']").cost = (Number(val.item(element).value) * Number(cost)).toFixed(2);
+					updateProductSummary();
+					if (val.item(element).value == "0") {
+						let notAddToBasketVar = document.createElement("li");
+						notAddToBasketVar.textContent = "Не дадаваць у замову";
+						let secondListItem = basketElement.querySelectorAll("li").item(2);
+						basketElement.querySelector("label[for='Cost']").textContent = "Цана: 0";
+						basketElement.insertBefore(notAddToBasketVar, secondListItem.nextSibling);
+						updateProductSummary();
+						if (notAddToBasketVar) {
+							return
+						}
+					}
+				}
+			}
+		}
+
+		function addItem(element) {
+			let val = document.getElementsByClassName("basket-quantity-val");
+			if (val.item(element) == null) {
+				let basketElement = document.querySelectorAll(".DescriptionProductBasket ul").item(element - 1);
+				let adderButton = document.getElementsByClassName("buy-product-button").item(element - 1);
+				let cost = adderButton.getAttribute("data-product-price");
+				val.item(element - 1).value = Number(val.item(element - 1).value) + 1;
+				basketElement.querySelector("label[for='Cost']").textContent = "Цана: " + (Number(val.item(element - 1).value) * Number(cost)).toFixed(2);
+				basketElement.querySelector("label[for='Cost']").cost = (Number(val.item(element - 1).value) * Number(cost)).toFixed(2);
+				if (basketElement.querySelectorAll("li").item(3)) {
+					basketElement.querySelectorAll("li").item(3).remove();
+				}
+			}
+			else {
+				let basketElement = document.querySelectorAll(".DescriptionProductBasket ul").item(element);
+				let adderButton = document.getElementsByClassName("buy-product-button").item(element);
+				let cost = adderButton.getAttribute("data-product-price");
+				val.item(element).value = Number(val.item(element).value) + 1;
+				basketElement.querySelector("label[for='Cost']").textContent = "Цана: " + (Number(val.item(element).value) * Number(cost)).toFixed(2);
+				basketElement.querySelector("label[for='Cost']").cost = (Number(val.item(element).value) * Number(cost)).toFixed(2);
+				if (basketElement.querySelectorAll("li").item(3)) {
+					basketElement.querySelectorAll("li").item(3).remove();
+				}
+			}
+			updateProductSummary();
+		}
+	</script>
+	<script type="text/javascript">
+		function cancelUserOrder() {
+			document.querySelector('footer').style = 'display: block';
+			document.querySelector(".productToOrderUl li").remove();
+			document.querySelector("label[for='adressOrder']").remove();
+			document.getElementsByClassName("confirmationPage").item(0).style = "display: none";
+		}
+		let confirmOrder = document.querySelector("confirmOrder");
+
+		function confirmUserOrder() {
+			let mainBasket = document.getElementsByClassName("MB-Basket");
+			mainBasket.item(0).style.display = "none";
+			document.querySelector('footer').style = 'display: none';
+			getProductList();
+			document.getElementsByClassName("confirmationPage").item(0).style = "display: block";
+		}
+	</script>
+	<header>
+		<div class="main_head_container">
+			<div class="payment">
+				<button translate="no" id="showPayButton" class="paymentMainButtonBefore" onclick="showMethodPay();">BYN</button>
+				<button id="showAdressButton" class="paymentMainButtonBefore" onclick="showAdressSelector();">Беларусь</button>
+				<button translate="no" id="showLangButton" class="paymentMainButtonBefore" onclick="showLangSelector();">Беларуская мова</button>
+				<button translate="no" id="showNumberButton" class="paymentMainButtonBefore" onclick="showNumberSelector();">+375</button>
+			</div>
+			<script>
+				function changePhoneNumber(number_code) {
+					countryCode = number_code;
+					$("#orderPhoneNumber").textContent = "";
+					document.querySelector("#orderPhoneNumber").maxlenght = countryCode.length + "(999)999-9999".length;
+					document.querySelector("#showNumberButton").textContent = countryCode;
+					$("#orderPhoneNumber").mask(`+380(999) 999-999`);
+					if (countryCode == '+997') {
+						$("#orderPhoneNumber").mask(`+977(999)999-999`);
+					}
+				}
+
+				function showLangSelector() {
+					const button = document.getElementById("showLangButton");
+					const cont = document.getElementsByClassName("lang-method-container").item(0);
+					cont.style.display = "block"
+					button.setAttribute('onclick', 'hideLangSelector()');
+					button.setAttribute('class', 'paymentMainButtonAfter');
+					hideMethodPay();
+					hideAdressSelector();
+					hideNumberSelector();
+				}
+
+				function showNumberSelector() {
+					const button = document.getElementById("showNumberButton");
+					const cont = document.getElementsByClassName("number-method-container").item(0);
+					cont.style.display = "block"
+					button.setAttribute('onclick', 'hideNumberSelector()');
+					button.setAttribute('class', 'paymentMainButtonAfter');
+					hideLangSelector();
+					hideMethodPay();
+					hideAdressSelector();
+				}
+
+				function showAdressSelector() {
+					const button = document.getElementById("showAdressButton");
+					const cont = document.getElementsByClassName("place-container").item(0);
+					cont.style.display = "block"
+					button.setAttribute('onclick', 'hideAdressSelector()');
+					button.setAttribute('class', 'paymentMainButtonAfter');
+					hideMethodPay();
+					hideLangSelector();
+					hideNumberSelector();
+				}
+
+				function showMethodPay() {
+					const button = document.getElementById("showPayButton");
+					const cont = document.getElementsByClassName("payment-method-container").item(0);
+					cont.style.display = "block"
+					button.setAttribute('onclick', 'hideMethodPay()');
+					button.setAttribute('class', 'paymentMainButtonAfter');
+					hideLangSelector();
+					hideAdressSelector();
+					hideNumberSelector();
+				}
+
+				function hideNumberSelector() {
+					const button = document.getElementById("showNumberButton");
+					const cont = document.getElementsByClassName("number-method-container").item(0);
+					cont.style.display = "none"
+					button.setAttribute('onclick', 'showNumberSelector()');
+					button.setAttribute('class', 'paymentMainButtonBefore');
+				}
+
+				function hideAdressSelector() {
+					const button = document.getElementById("showAdressButton");
+					const cont = document.getElementsByClassName("place-container").item(0);
+					cont.style.display = "none"
+					button.setAttribute('onclick', 'showAdressSelector()');
+					button.setAttribute('class', 'paymentMainButtonBefore');
+				}
+
+				function hideLangSelector() {
+					const button = document.getElementById("showLangButton");
+					const cont = document.getElementsByClassName("lang-method-container").item(0);
+					cont.style.display = "none"
+					button.setAttribute('onclick', 'showLangSelector()');
+					button.setAttribute('class', 'paymentMainButtonBefore');
+				}
+
+				function hideMethodPay() {
+					const button = document.getElementById("showPayButton");
+					const cont = document.getElementsByClassName("payment-method-container").item(0);
+					cont.style.display = "none"
+					button.setAttribute('onclick', 'showMethodPay()');
+					button.setAttribute('class', 'paymentMainButtonBefore');
+				}
+
+				function methonChangeCurrency(currencyParam, productID) {
+					let currencies = document.getElementsByClassName("payment-change");
+					let currencyButton = document.getElementById("showPayButton");
+					let sCurrency = currencyButton.textContent;
+					let dCurrency = "BYN";
+					if (currencyParam == "₽") {
+						currencyButton.textContent = currencies.item(0).textContent;
+						dCurrency = "RUB";
+					}
+					if (currencyParam == "B") {
+						currencyButton.textContent = currencies.item(1).textContent;
+						dCurrency = "BYN";
+					}
+					if (currencyParam == "$") {
+						currencyButton.textContent = currencies.item(2).textContent;
+						dCurrency = "USD";
+					}
+					if (currencyParam == "€") {
+						currencyButton.textContent = currencies.item(3).textContent;
+						dCurrency = "EUR";
+					}
+					if (currencyParam == "¥") {
+						currencyButton.textContent = currencies.item(4).textContent;
+						dCurrency = "CNY";
+					}
+					let costs = document.querySelectorAll(".productCostA");
+					let siteCosts = document.querySelectorAll(".buy-product-button");
+					let newCost;
+					let inBasketCosts = document.querySelectorAll("label[for='Cost']");
+					if (inBasketCosts.length == 0) {
+						costs.forEach(cost => {
+							siteCosts.forEach(sCost => {
+								newCost = fx(sCost.getAttribute("data-product-price")).from(sCurrency).to(dCurrency).toFixed(2);
+								cost.textContent = newCost;
+								sCost.setAttribute("data-product-price", newCost);
+							});
+						});
+					}
+					else {
+						costs.forEach(cost => {
+							siteCosts.forEach(sCost => {
+								inBasketCosts.forEach(ibCost => {
+									newCost = fx(sCost.getAttribute("data-product-price")).from(sCurrency).to(dCurrency).toFixed(2);
+									cost.textContent = newCost;
+									ibCost.textContent += newCost;
+									sCost.setAttribute("data-product-price", newCost);
+									updateProductSummary();
+								});
+							});
+						});
+						updateProductSummary();
+					}
+				}
+			</script>
+			<div class="main_head_logo">
+				<button id="showCatigoryButton" onclick="showCatigoryContainer();"><img width="150" height="90" src="Assets/Images/Logo.png" alt="Fetaly"> </button>
+			</div>
+			<div class="main_head_find_item">
+				<input id="search_with_voice" placeholder="Пошук тавару"> </div>
+			<div class="user-microphon">
+				<button id="start-btn"> <img id="microphone" s alt='Start voice search' src="Assets/Images/microphon.png" width="30px" height="30px"> </button>
+				<script>
+					const recognition = new window.webkitSpeechRecognition();
+					const startBtn = document.getElementById('start-btn');
+					const searchInput = document.getElementById('search_with_voice');
+					searchInput.value = '';
+					const microphone_img = document.getElementById('microphone');
+					recognition.lang = "ru-RU";
+					startBtn.addEventListener('click', () => {
+						recognition.start();
+						microphone_img.src = 'Assets/Images/active-microphon.png'
+					});
+					recognition.addEventListener('result', (event) => {
+						const transcript = event.results[0][0].transcript;
+						searchInput.value = transcript;
+						microphone_img.src = 'Assets/Images/microphon.png'
+					});
+				</script>
+			</div>
+			<div class="user-log">
+				<a href="main.html">
+					<button id="showCatigoryButton"><img alt="Log-in" src="Assets/Images/Log-in.png" width="30px; 30px;"></button>
+				</a>
+				<figcaption><a href="main.html">Мяню</a></figcaption>
+			</div>
+			<div class="user-basket">
+				<a>
+					<button id="BasketOpen" onclick="openBasket();"><img alt="Корзина" src="Assets/Images/Basket.png" width="40px; 40px;"> </button>
+					<label class="displayProductCounter">0</label>
+				</a>
+				<figcaption><a>Кошык</a></figcaption>
+			</div>
+		</div>
+	</header>
+	<div class="lang-method-container">
+		<label><b>Выберите язык</b></label>
+		<input id="FilterLangs" oninput="FilterNumber('FilterLangs', 'langs')">
+		<ul class="scrollLangValues">
+			<li class="langs" language="Беларуская мова" translate="no"><img src="Assets/Images/bel.png" width="20" height="10"> Беларуская мова
+				<button translate="yes" class="numbers-change" id='number-change' onclick="changeLanguage('be');"> Беларуская мова </button>
+			</li>
+			<li class="langs" language="Український" translate="no"><img src="Assets/Images/Flag_of_Ukraine.svg" width="20" height="10"> Український
+				<button translate="yes" class="numbers-change" id='number-change' onclick="changeLanguage('uk');"> Украінскі </button>
+			</li>
+			<li class="langs" language="Polski" translate="no"><img src="Assets/Images/Flag_of_Poland.svg" width="20" height="10"> Polski
+				<button translate="yes" class="numbers-change" id='number-change' onclick="changeLanguage('pl');"> Польскі </button>
+			</li>
+			<li class="langs" language="Русский язык" translate="no"><img src="Assets/Images/rus.jpg" width="20" height="10"> Русский язык
+				<button translate="yes" class="numbers-change" id='number-change' onclick="changeLanguage('ru');"> Рускі </button>
+			</li>
+			<li class="langs" language="Kазақ" translate="no"><img src="Assets/Images/kzt.jpg" width="20" height="10"> Kазақ
+				<button translate="yes" class="numbers-change" id='number-change' onclick="changeLanguage('kk')" ;> Казахскі </button>
+			</li>
+			<li class="langs" language="中国人" translate="no"><img src="Assets/Images/china.png" width="20" height="10"> 中国人
+				<button translate="yes" class="numbers-change" id='number-change' onclick="changeLanguage('zh-CN')"> Кiтайскi </button>
+			</li>
+			<li class="langs" language="English" translate="no"><img src="Assets/Images/britain.png" width="20" height="10"> English
+				<button translate="yes" class="numbers-change" id='number-change' onclick="changeLanguage('en')" ;> Англiскi </button>
+			</li>
+			<li class="langs" language="Français" translate="no"><img src="Assets/Images/Flag_of_France.svg" width="20" height="10"> Français
+				<button translate="yes" class="numbers-change" id='number-change' onclick="changeLanguage('fr')"> Французкi </button>
+			</li>
+		</ul>
+	</div>
+	<div class="select-payMethod-container">
+		<label><b>Выберите способ оплаты</b></label>
+		<input id="FilterPayMethods" oninput="FilterNumber('FilterPayMethods', 'paysMethods')">
+		<ul class="scrollPayMethodValues">
+			<li class="paysMethods" method="Ерип"><img src="Assets/Images/raschet.png" width="20" height="10"> Ерип
+				<button class="payMethods-change" id='payMethod-change' onclick="changePay('Ерип');"> Ерип </button>
+			</li>
+			<li class="paysMethods" method="Беларусьбанк"><img src="Assets/Images/belarusbank.png" width="20" height="10"> Беларусьбанк
+				<button class="payMethods-change" id='payMethod-change' onclick="changePay('Беларусьбанк');"> Беларусьбанк </button>
+			</li>
+			<li class="paysMethods" method="Visa"><img src="Assets/Images/visa.png" width="20" height="10"> Visa
+				<button class="payMethods-change" id='payMethod-change' onclick="changePay('Visa');"> Visa </button>
+			</li>
+			<li class="paysMethods" method="MasterCard"><img src="Assets/Images/master-card.png" width="20" height="10"> MasterCard
+				<button class="payMethods-change" id='payMethod-change' onclick="changePay('MasterCard');"> MasterCard </button>
+			</li>
+			<li class="paysMethods" method="Сбербанк"><img src="Assets/Images/sber.png" width="20" height="10"> Сбербанк
+				<button class="payMethods-change" id='payMethod-change' onclick="changePay('Сбербанк');"> Сбербанк </button>
+			</li>
+			<li class="paysMethods" method="QIWI"><img src="Assets/Images/qiwi.png" width="20" height="10"> QIWI
+				<button class="payMethods-change" id='payMethod-change' onclick="changePay('QIWI');"> QIWI </button>
+			</li>
+			<button onclick="closePays();" class="confirmPay">Подвердить</button>
+		</ul>
+	</div>
+	<script type="text/javascript">
+		function openPays() {
+			document.querySelector(".select-payMethod-container").style.display = "block";
+		}
+
+		function closePays() {
+			document.querySelector(".select-payMethod-container").style.display = "none";
+		}
+
+		function changePay(paym) {
+			let payDiv = document.querySelector(".orderPaymentMethon");
+			let newMethod = document.createElement("label");
+			newMethod.textContent = "Спосаб аплаты: " + paym;
+			newMethod.htmlFor = "orderPayMethod";
+			payDiv.appendChild(newMethod);
+			if (payDiv.querySelectorAll("label[for='orderPayMethod']").length > 1) {
+				payDiv.querySelectorAll("label[for='orderPayMethod']").item(0).remove();
+			}
+		}
+
+		function changeLanguage(lang) {
+			var select = document.querySelector("#google_translate_element select");
+			select.value = lang;
+			let langButton = document.getElementById("showLangButton");
+			let langs = document.getElementsByClassName("langs");
+			if (select.value == "ru") {
+				recognition.lang = 'ru-RU';
+				langButton.textContent = langs.item(3).getAttribute("language");
+				document.cookie = "language=ru";
+			}
+			if (select.value == "be") {
+				recognition.lang = 'ru-RU';
+				langButton.textContent = langs.item(0).getAttribute("language");
+				document.cookie = "language=be";
+			}
+			if (select.value == "uk") {
+				recognition.lang = 'uk-UA';
+				langButton.textContent = langs.item(1).getAttribute("language");
+				document.cookie = "language=uk";
+			}
+			if (select.value == "pl") {
+				recognition.lang = 'pl-PL';
+				langButton.textContent = langs.item(2).getAttribute("language");
+				document.cookie = "language=pl";
+			}
+			if (select.value == "kk") {
+				recognition.lang = 'kk-KZ';
+				langButton.textContent = langs.item(4).getAttribute("language");
+				document.cookie = "language=kk";
+			}
+			if (select.value == "zh-CN") {
+				recognition.lang = 'zh-CN';
+				langButton.textContent = langs.item(5).getAttribute("language");
+				document.cookie = "language=zh-CN";
+			}
+			if (select.value == "en") {
+				recognition.lang = 'en-US';
+				langButton.textContent = langs.item(6).getAttribute("language");
+				document.cookie = "language=en";
+			}
+			if (select.value == "fr") {
+				recognition.lang = 'fr-FR';
+				langButton.textContent = langs.item(7).getAttribute("language");
+				document.cookie = "language=fr";
+			}
+			select.dispatchEvent(new Event('change'));
+		}
+	</script>
+	<div class="payment-method-container">
+		<label><b>Абярыце валюту</b></label>
+		<input id="FilterPayments" oninput="FilterCurrency()">
+		<ul class="scroollValues">
+			<li class="currencies"><img src="Assets/Images/rus.jpg" width="20" height="10"> Расійскі рубель -
+				<button translate="no" class="payment-change" id='payment-change' onclick="methonChangeCurrency('₽')" ;>RUB</button>(₽)</li>
+			<li class="currencies"><img src="Assets/Images/bel.png" width="20" height="10"> Беларускі рубль -
+				<button translate="no" class="payment-change" id='payment-change' onclick="methonChangeCurrency('B')" ;>BYN</button>(Br)</li>
+			<li class="currencies"><img src="Assets/Images/usa.png" width="20" height="10"> Амерыканскі Доллар -
+				<button translate="no" class="payment-change" id='payment-change' onclick="methonChangeCurrency('$')" ;>USD</button>($)</li>
+			<li class="currencies"><img src="Assets/Images/euro.png" width="20" height="10"> Еўравалюта -
+				<button translate="no" class="payment-change" id='payment-change' onclick="methonChangeCurrency('€')" ;>EUR</button>(€)</li>
+			<li class="currencies"><img src="Assets/Images/china.png" width="20" height="10"> Кітайскі Юань -
+				<button translate="no" class="payment-change" id='payment-change' onclick="methonChangeCurrency('¥')" ;>CNY</button>(¥)</li>
+		</ul>
+	</div>
+	<div class="place-container">
+		<label><b>Выбар месцазнаходжання</b></label>
+		<ul>
+			<li>
+				<input required class="place-container-i" placeholder="Краіна"> </li>
+			<li>
+				<input required class="place-container-i" placeholder="Край, Вобласць, Штат"> </li>
+			<li>
+				<input required class="place-container-i" placeholder="Горад/Населены пункт"> </li>
+			<li>
+				<input class="place-container-i" placeholder="Вуліца"> </li>
+			<li>
+				<input required class="place-container-i" placeholder="Дом/Кватэра"> </li>
+			<li>
+				<input required class="place-container-i" placeholder="Пошта"> </li>
+			<li>
+				<input required class="place-container-i" placeholder="Паштовы індэкс"> </li>
+			<li>
+				<button class="changePointIssueButton" onclick="changeIPCookie();">Пацвердзіць</button>
+			</li>
+		</ul>
+	</div>
+	<script type="text/javascript">
+		function changeIPCookie() {
+			let ips = [document.querySelectorAll('input.place-container-i').item(0), document.querySelectorAll('input.place-container-i').item(1), document.querySelectorAll('input.place-container-i').item(2), document.querySelectorAll('input.place-container-i').item(3), document.querySelectorAll('input.place-container-i').item(4), document.querySelectorAll('input.place-container-i').item(5), document.querySelectorAll('input.place-container-i').item(6), document.querySelectorAll('input.place-container-i').item(0)]
+			country = document.querySelectorAll('input.place-container-i').item(0).value;
+			oblast = document.querySelectorAll('input.place-container-i').item(1).value;
+			city = document.querySelectorAll('input.place-container-i').item(2).value;
+			street = document.querySelectorAll('input.place-container-i').item(3).value;
+			house = document.querySelectorAll('input.place-container-i').item(4).value;
+			mail = document.querySelectorAll('input.place-container-i').item(5).value;
+			mailIndex = document.querySelectorAll('input.place-container-i').item(6).value;
+			if (country == "" || oblast == "" || city == "" || street == "" || house == "" || mail == "" || mailIndex == "") {
+				for (step = 0; step < ips.length; step++) {
+					ips[step].classList.add("error")
+				}
+			}
+			else {
+				for (step = 0; step < ips.length; step++) {
+					ips[step].classList.remove("error")
+				}
+				hideAdressSelector();
+			}
+		}
+	</script>
+	<script type="text/javascript">
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(function (position) {
+				var latitude = position.coords.latitude;
+				var longitude = position.coords.longitude;
+				var url = "https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=" + latitude + "&longitude=" + longitude + "&localityLanguage=be";
+				fetch(url).then(response => response.json()).then(data => {
+					var countryGet = data.countryName;
+					document.querySelectorAll('input.place-container-i').item(0).value = countryGet;
+					document.querySelectorAll("#showAdressButton").textContent = countryGet;
+				});
+			});
+		}
+	</script>
+	<div class="number-method-container">
+		<label><b>Абярыце код нумара</b></label>
+		<input id="FilterNumbers" oninput="FilterNumber('FilterNumbers', 'numbers')">
+		<ul class="scrollNumValues">
+			<li class="numbers"><img src="Assets/Images/bel.png" width="20" height="10"> Беларусь -
+				<button class="numbers-change" id='number-change' onclick="changePhoneNumber('+375')" ;>+375</button>
+			</li>
+			<li class="numbers"><img src="Assets/Images/Flag_of_Poland.svg" width="20" height="10"> Польшча -
+				<button class="numbers-change" id='number-change' onclick="changePhoneNumber('+48')" ;>+48</button>
+			</li>
+			<li class="numbers"><img src="Assets/Images/Flag_of_Ukraine.svg" width="20" height="10"> Украіна -
+				<button class="numbers-change" id='number-change' onclick="changePhoneNumber('+380')" ;>+380</button>
+			</li>
+			<li class="numbers"><img src="Assets/Images/rus.jpg" width="20" height="10"> Расія -
+				<button class="numbers-change" id='number-change' onclick="changePhoneNumber('+7')" ;>+7</button>
+			</li>
+			<li class="numbers"><img src="Assets/Images/kzt.jpg" width="20" height="10"> Казахстан -
+				<button class="numbers-change" id='number-change' onclick="changePhoneNumber('+997')" ;>+997</button>
+			</li>
+			<li class="numbers"><img src="Assets/Images/china.png" width="20" height="10"> Кітай -
+				<button class="numbers-change" id='number-change' onclick="changePhoneNumber('+86')" ;>+86</button>
+			</li>
+			<li class="numbers"><img src="Assets/Images/usa.png" width="20" height="10"> ЗША -
+				<button class="numbers-change" id='number-change' onclick="changePhoneNumber('+1')" ;>+1</button>
+			</li>
+			<li class="numbers"><img src="Assets/Images/Flag_of_France.svg" width="20" height="10"> Францыя -
+				<button class="numbers-change" id='number-change' onclick="changePhoneNumber('+33')" ;>+33</button>
+			</li>
+		</ul>
+	</div>
+	<script type="text/javascript">
+		let inp = document.getElementsByClassName("place-container-i")
+		for (step = 0; step < inp.length; step++) {
+			inp.item(step).style.color = "#007aff";
+			inp.item(step).style.border = "2px solid #007aff";
+			inp.item(step).style.borderColor = "#007aff";
+		}
+	</script>
+	<script type="text/javascript">
+		let elem;
+
+		function FilterNumber(filed, ulD) {
+			let fil = document.getElementById(filed);
+			let ulC = document.getElementsByClassName(ulD);
+			for (elem = 0; elem < ulC.length; elem++) {
+				if (ulC.item(elem).textContent.includes(fil.value)) {
+					ulC.item(elem).style.display = "block";
+				}
+				else {
+					ulC.item(elem).style.display = "none";
+				}
+			}
+		}
+
+		function FilterCurrency() {
+			let fil = document.getElementById("FilterPayments");
+			let ulC = document.getElementsByClassName("currencies");
+			for (elem = 0; elem < ulC.length; elem++) {
+				if (ulC.item(elem).textContent.includes(fil.value)) {
+					ulC.item(elem).style.display = "block";
+				}
+				else {
+					ulC.item(elem).style.display = "none";
+				}
+			}
+		}
+	</script>
+	<div class="product-cat">
+		<div class="categoryButtons">
+			<div class="categoryButton">
+				<button class="category-text-button">Фота і відэакамеры</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Аксэсуары для смартфонаў</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Навушнікі і аудыётэхніка</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Кабелі і зарадныя прылады</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Разумная хата і бяспека</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Офісная тэхніка</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Смарт-гадзіны і фітнес-бранзалеты</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Сеткавае абсталяванне</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Сонечныя электрастанцыі і камплектуючыя</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Дзіцячая электроніка</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Іншае</button>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		function showCatigoryContainer() {
+			const menu = document.getElementById("showCatigoryButton");
+			const catigory = document.getElementsByClassName("product-cat")
+			const mainElements = document.getElementsByTagName("main");
+			if (catigory == null) {
+				return
+			}
+			catigory.item(0).style.display = "block";
+			mainElements.item(0).style.filter = "blur(10px)";
+			menu.setAttribute('onclick', 'hideCatigoryContainer()');
+		}
+
+		function hideCatigoryContainer() {
+			const menu = document.getElementById("showCatigoryButton")
+			const catigory = document.getElementsByClassName("product-cat")
+			const mainElements = document.getElementsByTagName("main");
+			if (catigory == null) {
+				return
+			}
+			catigory.item(0).style.display = "none";
+			mainElements.item(0).style.filter = "none";
+			menu.setAttribute('onclick', 'showCatigoryContainer()');
+		}
+	</script>
+	<main>
+		<div class='product-container' id="7112124251975475">
+			<div class="product">
+				<button class="redirecter" onclick="redirectToProductInfo(0)"><img alt="Product" width="200" height="250" src="Assets/Images/Products/cover1.jpg"></button>
+				<figcaption style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><a><b class="productCostA">21.51</b></a> </figcaption>
+				<figcaption style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Чахол Samsung Galaxy S7 Edge</figcaption>
+				<figcaption>★<b>5.0</b> · <b>0</b> водгуку(ов)</figcaption>
+				<button onclick="addToBasketFn(0);" data-id="7112124251975475" data-product-name="Чахол Samsung Galaxy S7 Edge Слон" data-product-price="21.51" data-product-quantity="1" data-product-img="Assets/Images/Products/cover1.jpg" class="buy-product-button" data-value-inshop="16" delivery="Бясплатная"> <a>Дабавить у кошык
+                    </a> </button>
+			</div>
+		</div>
+		<script>
+			function redirectToProductInfo(element) {
+				var productName = document.getElementsByClassName("buy-product-button").item(element).getAttribute("data-id");
+				window.location.href = "product.html?id=" + encodeURIComponent(productName);
+			}
+
+			function deleteProductFromBasket(element) {
+				document.getElementsByClassName("Product-MainBasket").item(element).remove();
+				updateProductSummary();
+				if (document.getElementsByClassName("Product-MainBasket").length <= 0) {
+					document.getElementsByClassName("Summurised_Description_ProductBasket").item(0).style.display = "none";
+					document.querySelector(".basketEmpty").style.display = "block";
+				}
+				document.querySelectorAll(".basket-add-item").forEach(add => {
+					add.onclick = function () {
+						addItem(element - 1);
+					};
+				});
+				document.querySelectorAll(".basket-remove-item").forEach(rem => {
+					rem.onclick = function () {
+						removeItem(element - 1);
+					};
+				});
+			}
+
+			function openBasket() {
+				let mainBasket = document.getElementsByClassName("MB-Basket");
+				mainBasket.item(0).style.display = "block";
+				document.querySelector('footer').style = 'display: none';
+			}
+			let products = document.getElementsByClassName("buy-product-button");
+
+			function addToBasketFn(element) {
+				var defaultProduct = document.createElement("div");
+				defaultProduct.id = "";
+				defaultProduct.className = "Product-MainBasket";
+				let mainBasket = document.getElementsByClassName("MB-Basket");
+				let productID = products.item(element).getAttribute("data-id");
+				let existingProduct = mainBasket.item(0).querySelectorAll(`label[for="id"]`);
+				let isCopy = false;
+				for (step = 0; step < existingProduct.length; step++) {
+					if ((existingProduct.item(step).textContent) === ("ID: " + productID)) {
+						isCopy = true;
+					}
+				}
+				openBasket();
+				if (isCopy) {
+					alert("Уже в корзине");
+				}
+				else {
+					if (document.getElementsByClassName("Summurised_Description_ProductBasket").item(0).style.display == "") {
+						document.getElementsByClassName("Summurised_Description_ProductBasket").item(0).style.display = "inline-block";
+					}
+					if (document.querySelector(".basketEmpty").style.display != "none") {
+						document.querySelector(".basketEmpty").style.display = "none";
+					}
+					var imageProductBasket = document.createElement("div");
+					imageProductBasket.className = "ImageProductBasket";
+					defaultProduct.appendChild(imageProductBasket);
+					var imageProductBasketPreview = document.createElement("img");
+					imageProductBasketPreview.className = "ImageProductBasketPreview";
+					imageProductBasketPreview.src = products.item(element).getAttribute("data-product-img");
+					imageProductBasketPreview.width = "90";
+					imageProductBasketPreview.height = "90";
+					imageProductBasket.appendChild(imageProductBasketPreview);
+					var descriptionProductBasket = document.createElement("div");
+					descriptionProductBasket.className = "DescriptionProductBasket";
+					defaultProduct.appendChild(descriptionProductBasket);
+					var ul = document.createElement("ul");
+					descriptionProductBasket.appendChild(ul);
+					var idLi = document.createElement("li");
+					ul.appendChild(idLi);
+					var idLabel = document.createElement("label");
+					idLabel.htmlFor = "id";
+					idLabel.textContent = "ID: " + products.item(element).getAttribute("data-id");
+					idLi.appendChild(idLabel);
+					var costLi = document.createElement("li");
+					ul.appendChild(costLi);
+					var costLabel = document.createElement("label");
+					costLabel.htmlFor = "Cost";
+					costLabel.cost = products.item(element).getAttribute("data-product-price");
+					costLabel.textContent = "Цена: " + products.item(element).getAttribute("data-product-price");
+					costLi.appendChild(costLabel);
+					var productNameLi = document.createElement("li");
+					ul.appendChild(productNameLi);
+					var productNameLabel = document.createElement("label");
+					productNameLabel.htmlFor = "ProductName";
+					productNameLabel.textContent = "Товар: " + products.item(element).getAttribute("data-product-name");
+					productNameLi.appendChild(productNameLabel);
+					var addButton = document.createElement("button");
+					addButton.onclick = function () {
+						addItem(element);
+					};
+					addButton.className = "basket-add-item";
+					addButton.textContent = "+";
+					var basketQuantityItem = document.createElement("div");
+					basketQuantityItem.className = "basket-quantity-item";
+					ul.appendChild(basketQuantityItem);
+					var removeButton = document.createElement("button");
+					removeButton.onclick = function () {
+						removeItem(element);
+					};
+					removeButton.className = "basket-remove-item";
+					removeButton.textContent = "-";
+					var quantityInput = document.createElement("input");
+					quantityInput.className = "basket-quantity-val";
+					quantityInput.type = "number";
+					quantityInput.min = "1";
+					quantityInput.step = "1";
+					quantityInput.pattern = "^[0-9]";
+					quantityInput.value = "1";
+					basketQuantityItem.appendChild(removeButton);
+					basketQuantityItem.appendChild(quantityInput);
+					basketQuantityItem.appendChild(addButton);
+					var removeProductDiv = document.createElement('div');
+					removeProductDiv.className = 'removeProductFromBasket';
+					removeProductDiv.innerHTML = '<button onclick="deleteProductFromBasket();"><img width="20" height="20" src="Assets/Images/close.png"></button>';
+					defaultProduct.appendChild(removeProductDiv);
+					let basket = document.getElementsByClassName("Products-MainBasket").item(0);
+					basket.appendChild(defaultProduct);
+					updateProductSummary();
+				}
+			}
+		</script>
+	</main>
+	<footer>
+		<div class="footer-info">
+			<div class="footer-info-top">
+				<div class="footer-info-top-company">
+					<h2>Кампанія</h2>
+					<ul>
+						<li><a href="main.html#about-us">Пра нас</a></li>
+						<li><a href="main.html#about-company">Аб кампаніі</a></li>
+					</ul>
+				</div>
+				<div class="footer-info-top-buyer">
+					<h2>Пакупнікам</h2>
+					<ul>
+						<li><a href="main.html#payments-metod">Спосабы аплаты</a></li>
+						<li><a href="main.html#how-to-buy__delivery">Дастаўка</a></li>
+						<li><a href="main.html#how-to-buy__delivery">Як купляць</a></li>
+						<li><a href="main.html#product-return">Зварот тавара</a></li>
+						<li><a href="main.html#money-return">Зварот сродкаў</a></li>
+					</ul>
+				</div>
+			</div>
+			<div class="footer-info-left">
+				<ul class="footer-info-list">
+					<li class="footer-info-item" data-text="strAddressInfo">ТАА «ІМВБРБ», г. Мінск, вул. Марвінава 10m, памяшканне 10, офіс 13</li>
+					<li class="footer-info-item" data-text="strAddressInfoByUPN">127253, Масква, пр-д Ліяназоўскі, дом 6, паверх 3, памяшканне 6, ТАА "ІНТЭЛ-РУАЛ", Крывенка Арцём Барысавічаў дзяржаўнай рэгістрацыі юрыдычнай асобы выдадзена ад 01.07.2022 г. №127253) </li>
+					<li class="footer-info-item" data-text="strDateOfInclusion"> Дата ўключэння звестак аб інтэрнэт-краме ў Гандлёвы рэестр Рэспублікі Беларусь 01.07.2022</li>
+					<li class="footer-info-item"> <span data-text="strTelephoneToCall">Тэлефон для сувязі: </span> <a data-tag="phoneToCall" data-text="strTelephoneToCallTel" href="Номер телфона:+375173886000">+7 (727) 338‒36‒96</a> </li>
+					<li class="footer-info-item" data-text="strSchedule">Рэжым працы: 9:00-19:00 (Мясцовы час GMT+3)</li>
+					<li class="footer-info-item" data-text="strPost">Спосаб дастаўкі: Еўрапошта</li>
+				</ul>
+			</div>
+			<div class="footer-info-right">
+				<ul class="footer-info-list">
+					<li class="footer-info-item"> <span data-text="strConsumerRights">Асоба, упаўнаважаная прадаўцом разглядаць звароты пакупнікоў аб парушэнні іх правоў, прадугледжаных заканадаўствам аб абароне правоў спажыўцоў - Алена Макарава, тэл. </span> <a data-tag="phoneConsumer" data-text="strConsumerRightsTel" href="tel:+77273883696">+7 (727) 338‒36‒96</a> </li>
+					<li class="footer-info-item" data-text="strListUsefulPhoneNumbers"> Нумары гарадскіх тэлефонаў упаўнаважаных па абароне правоў спажыўцоў:</li>
+					<li class="footer-info-item"> <a data-tag="phoneAdministration" data-text="strAdministrationInfoTel" href="tel:+74999952107">+7 499 995 2107</a> <span data-text="strAdministrationInfo">- адміністрацыя офіса</span> </li>
+					<li class="footer-info-item"> <span data-text="strProcessingClaims">
+Па афармленні вяртання, звяжыцеся з намі па электроннай пошце:</span> <a data-tag="processingClaimsMail" data-text="strProcessingClaimsMail" href="mailto:shop@fetaly.by">shop@belmarwin.by</a> </li>
+				</ul>
+			</div>
+			<div class="footer-c" data-tag="copyrightShort">2023 © Belmarwin</div>
+		</div>
+	</footer>
+</body>
+
+</html>

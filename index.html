@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<!-- Некотырый функционал сайта неработает без интернет подключения и хостинга, так как использует сторннние библиотеки и сервися. Хостингом может являться OSPanel(Open Server), Brakets Live, PyCharm Live и также платные хостинги, такие как InterServer. В случае отсутсвия хостинга смена языков и использование cookie не будет доступным. Также не будут работь библиотека конвертации валют.-->
+
+<head>
+	<title>BelMarwin</title>
+	<link rel="stylesheet" type="text/css" href="CSS/style.css">
+	<script src="https://www.cbr-xml-daily.ru/money.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.10/jquery.mask.js"></script>
+	<script>
+		let country = "Беларусь";
+		let oblast = "";
+		let city = "";
+		let street = "";
+		let house = "";
+		let mail = "";
+		let mailIndex = "";
+		let pasInDe = "";
+		let allowDeveloper = false;
+	</script>
+	<script type="text/javascript" src="JS/ownAutoDisableDev.js"></script>
+</head>
+<body>
+	<script type="text/javascript">
+		function googleTranslateElementInit() {
+			new google.translate.TranslateElement({
+				pageLanguage: 'be'
+			}, 'google_translate_element');
+		}
+	</script>
+	<div id="google_translate_element" style="display: none">
+		
+	</div>
+	<div class="MB-Basket">
+		<div class="Main-Basket">
+			<div class="Main-BasketName">
+				<button class="CloseBasket" onclick="closeBasket()"><img src="Assets/Images/close.png"></button>
+				<label class="nameBasket2">
+					<h2>Кошык</h2></label>
+				<label class="basketEmpty">
+					<h2>Кошык пуст</h2>
+					<div class="goBuyingProducts">
+						<button><a href="index.html">Па пакупкі</a></button>
+					</div>
+				</label>
+			</div>
+			<div class="Products-MainBasket"> </div>
+			<div class="Summurised_Description_ProductBasket">
+				<ul>
+					<li>
+						<label id="common-cost">Выніковая каштоўнасць:</label>
+					</li>
+					<li>
+						<label id="common-count">Агульная колькасць тавараў:</label>
+					</li>
+					<li>
+						<button onclick="confirmUserOrder();" class="confirmOrder">Пацвердзіць і аплаціць пакупкі</button>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="confirmationPage">
+		<div class="confirmationPageOutline">
+			<form id="orderForm" method="POST" action="sendOrder.php">
+				<div class="orderMainName">
+					<h1>Афармленне замовы</h1> </div>
+				<div class="productToOrder">
+					<label class="containerNames-order">Заказаныя тавары: </label>
+					<ul class="productToOrderUl"></ul>
+				</div>
+				<div class="pointIssue">
+					<label class="containerNames-order">Пункт дастаўкі і выдачы</label>
+					<button type="button" onclick="changeIPLocation();" class="changePointIssue">Выбраць месцазнаходжанне ▼</button>
+				</div>
+				<div class="orderPaymentMethon">
+					<label class="containerNames-order">Спосабы аплаты</label>
+					<button type="button" onclick="openPays();" class="changeOrderPaymentMethon">Выбар спосабу аплаты</button>
+				</div>
+				<div class="userInfo">
+					<label class="containerNames-order">Пакупнік</label>
+					<input name="numberS" type="tel" required maxlength="14" id="orderPhoneNumber" placeholder="Нумар тэлефона: ">
+					<input name="emailS" type="email" required id="orderEmail" placeholder="Адрас электроннай пошты: ">
+					<input name="nameS" required id="orderName" placeholder="ПІБ: "> </div>
+				<button type="submit" id="confirmOrderSubmit">Завяршыць</button>
+				<button onclick="cancelUserOrder();" type="reset" id="cancelOrderSubmit">Адмяніць</button>
+			</form>
+		</div>
+	</div>
+	<script type="text/javascript" src="JS/orderValidater.js"></script>
+	<script type="text/javascript" src="JS/getProductList.js"></script>
+	<script type="text/javascript" src="JS/maskModule.js"></script>
+	<script type="text/javascript" src="JS/locationModule.js"></script>
+	<script type="text/javascript" src="JS/basketMarwinModule.js"></script>
+	<script type="text/javascript" src="JS/orderMarwinModule.js"></script>
+	<header>
+		<div class="main_head_container">
+			<div class="payment">
+				<button translate="no" id="showPayButton" class="paymentMainButtonBefore" onclick="showMethodPay();">BYN</button>
+				<button id="showAdressButton" class="paymentMainButtonBefore" onclick="showAdressSelector();">Беларусь</button>
+				<button translate="no" id="showLangButton" class="paymentMainButtonBefore" onclick="showLangSelector();">Беларуская мова</button>
+				<button translate="no" id="showNumberButton" class="paymentMainButtonBefore" onclick="showNumberSelector();">+375</button>
+			</div>
+			<script type="text/javascript" src="JS/selectorsChange.js"></script>
+			<div class="main_head_logo">
+				<button id="showCatigoryButton" onclick="showCatigoryContainer();"><img width="150" height="90" src="Assets/Images/Logo.png" alt="Fetaly"> </button>
+			</div>
+			<div class="main_head_find_item">
+				<input id="search_with_voice" placeholder="Пошук тавару"> </div>
+			<div class="user-microphon">
+				<button id="start-btn"> <img id="microphone" s alt='Start voice search' src="Assets/Images/microphon.png" width="30px" height="30px"> </button>
+				<script type="text/javascript" src="JS/recognitionModule.js"></script>
+			</div>
+			<div class="user-log">
+				<a href="main.html">
+					<button id="showCatigoryButton"><img alt="Log-in" src="Assets/Images/Log-in.png" width="30px; 30px;"></button>
+				</a>
+				<figcaption><a href="main.html">Мяню</a></figcaption>
+			</div>
+			<div class="user-basket">
+				<a>
+					<button id="BasketOpen" onclick="openBasket();"><img alt="Корзина" src="Assets/Images/Basket.png" width="40px; 40px;"> </button>
+					<label class="displayProductCounter">0</label>
+				</a>
+				<figcaption><a>Кошык</a></figcaption>
+			</div>
+		</div>
+	</header>
+	<div class="lang-method-container">
+		<label><b>Выберите язык</b></label>
+		<input id="FilterLangs" oninput="FilterNumber('FilterLangs', 'langs')">
+		<ul class="scrollLangValues">
+			<li class="langs" language="Беларуская мова" translate="no"><img src="Assets/Images/bel.png" width="20" height="10"> Беларуская мова
+				<button translate="yes" class="numbers-change" id='number-change' onclick="changeLanguage('be');"> Беларуская мова </button>
+			</li>
+			<li class="langs" language="Український" translate="no"><img src="Assets/Images/Flag_of_Ukraine.svg" width="20" height="10"> Український
+				<button translate="yes" class="numbers-change" id='number-change' onclick="changeLanguage('uk');"> Украінскі </button>
+			</li>
+			<li class="langs" language="Polski" translate="no"><img src="Assets/Images/Flag_of_Poland.svg" width="20" height="10"> Polski
+				<button translate="yes" class="numbers-change" id='number-change' onclick="changeLanguage('pl');"> Польскі </button>
+			</li>
+			<li class="langs" language="Русский язык" translate="no"><img src="Assets/Images/rus.jpg" width="20" height="10"> Русский язык
+				<button translate="yes" class="numbers-change" id='number-change' onclick="changeLanguage('ru');"> Рускі </button>
+			</li>
+			<li class="langs" language="Kазақ" translate="no"><img src="Assets/Images/kzt.jpg" width="20" height="10"> Kазақ
+				<button translate="yes" class="numbers-change" id='number-change' onclick="changeLanguage('kk')" ;> Казахскі </button>
+			</li>
+			<li class="langs" language="中国人" translate="no"><img src="Assets/Images/china.png" width="20" height="10"> 中国人
+				<button translate="yes" class="numbers-change" id='number-change' onclick="changeLanguage('zh-CN')"> Кiтайскi </button>
+			</li>
+			<li class="langs" language="English" translate="no"><img src="Assets/Images/britain.png" width="20" height="10"> English
+				<button translate="yes" class="numbers-change" id='number-change' onclick="changeLanguage('en')" ;> Англiскi </button>
+			</li>
+			<li class="langs" language="Français" translate="no"><img src="Assets/Images/Flag_of_France.svg" width="20" height="10"> Français
+				<button translate="yes" class="numbers-change" id='number-change' onclick="changeLanguage('fr')"> Французкi </button>
+			</li>
+		</ul>
+	</div>
+	<div class="select-payMethod-container">
+		<label><b>Выберите способ оплаты</b></label>
+		<input id="FilterPayMethods" oninput="FilterNumber('FilterPayMethods', 'paysMethods')">
+		<ul class="scrollPayMethodValues">
+			<li class="paysMethods" method="Ерип"><img src="Assets/Images/raschet.png" width="20" height="10"> Ерип
+				<button class="payMethods-change" id='payMethod-change' onclick="changePay('Ерип');"> Ерип </button>
+			</li>
+			<li class="paysMethods" method="Беларусьбанк"><img src="Assets/Images/belarusbank.png" width="20" height="10"> Беларусьбанк
+				<button class="payMethods-change" id='payMethod-change' onclick="changePay('Беларусьбанк');"> Беларусьбанк </button>
+			</li>
+			<li class="paysMethods" method="Visa"><img src="Assets/Images/visa.png" width="20" height="10"> Visa
+				<button class="payMethods-change" id='payMethod-change' onclick="changePay('Visa');"> Visa </button>
+			</li>
+			<li class="paysMethods" method="MasterCard"><img src="Assets/Images/master-card.png" width="20" height="10"> MasterCard
+				<button class="payMethods-change" id='payMethod-change' onclick="changePay('MasterCard');"> MasterCard </button>
+			</li>
+			<li class="paysMethods" method="Сбербанк"><img src="Assets/Images/sber.png" width="20" height="10"> Сбербанк
+				<button class="payMethods-change" id='payMethod-change' onclick="changePay('Сбербанк');"> Сбербанк </button>
+			</li>
+			<li class="paysMethods" method="QIWI"><img src="Assets/Images/qiwi.png" width="20" height="10"> QIWI
+				<button class="payMethods-change" id='payMethod-change' onclick="changePay('QIWI');"> QIWI </button>
+			</li>
+			<button onclick="closePays();" class="confirmPay">Подвердить</button>
+		</ul>
+	</div>
+	<script type="text/javascript" src="JS/switchLanguge.js"></script>
+	<div class="payment-method-container">
+		<label><b>Абярыце валюту</b></label>
+		<input id="FilterPayments" oninput="FilterCurrency()">
+		<ul class="scroollValues">
+			<li class="currencies"><img src="Assets/Images/rus.jpg" width="20" height="10"> Расійскі рубель -
+				<button translate="no" class="payment-change" id='payment-change' onclick="methonChangeCurrency('₽')" ;>RUB</button>(₽)</li>
+			<li class="currencies"><img src="Assets/Images/bel.png" width="20" height="10"> Беларускі рубль -
+				<button translate="no" class="payment-change" id='payment-change' onclick="methonChangeCurrency('B')" ;>BYN</button>(Br)</li>
+			<li class="currencies"><img src="Assets/Images/usa.png" width="20" height="10"> Амерыканскі Доллар -
+				<button translate="no" class="payment-change" id='payment-change' onclick="methonChangeCurrency('$')" ;>USD</button>($)</li>
+			<li class="currencies"><img src="Assets/Images/euro.png" width="20" height="10"> Еўравалюта -
+				<button translate="no" class="payment-change" id='payment-change' onclick="methonChangeCurrency('€')" ;>EUR</button>(€)</li>
+			<li class="currencies"><img src="Assets/Images/china.png" width="20" height="10"> Кітайскі Юань -
+				<button translate="no" class="payment-change" id='payment-change' onclick="methonChangeCurrency('¥')" ;>CNY</button>(¥)</li>
+		</ul>
+	</div>
+	<div class="place-container">
+		<label><b>Выбар месцазнаходжання</b></label>
+		<ul>
+			<li>
+				<input required class="place-container-i" placeholder="Краіна"> </li>
+			<li>
+				<input required class="place-container-i" placeholder="Край, Вобласць, Штат"> </li>
+			<li>
+				<input required class="place-container-i" placeholder="Горад/Населены пункт"> </li>
+			<li>
+				<input class="place-container-i" placeholder="Вуліца"> </li>
+			<li>
+				<input required class="place-container-i" placeholder="Дом/Кватэра"> </li>
+			<li>
+				<input required class="place-container-i" placeholder="Пошта"> </li>
+			<li>
+				<input required class="place-container-i" placeholder="Паштовы індэкс"> </li>
+			<li>
+				<button class="changePointIssueButton" onclick="changeIPCookie();">Пацвердзіць</button>
+			</li>
+		</ul>
+	</div>
+	<script type="text/javascript" src="JS/navigatorLocation.js"></script>
+	<div class="number-method-container">
+		<label><b>Абярыце код нумара</b></label>
+		<input id="FilterNumbers" oninput="FilterNumber('FilterNumbers', 'numbers')">
+		<ul class="scrollNumValues">
+			<li class="numbers"><img src="Assets/Images/bel.png" width="20" height="10"> Беларусь -
+				<button class="numbers-change" id='number-change' onclick="changePhoneNumber('+375')" ;>+375</button>
+			</li>
+			<li class="numbers"><img src="Assets/Images/Flag_of_Poland.svg" width="20" height="10"> Польшча -
+				<button class="numbers-change" id='number-change' onclick="changePhoneNumber('+48')" ;>+48</button>
+			</li>
+			<li class="numbers"><img src="Assets/Images/Flag_of_Ukraine.svg" width="20" height="10"> Украіна -
+				<button class="numbers-change" id='number-change' onclick="changePhoneNumber('+380')" ;>+380</button>
+			</li>
+			<li class="numbers"><img src="Assets/Images/rus.jpg" width="20" height="10"> Расія -
+				<button class="numbers-change" id='number-change' onclick="changePhoneNumber('+7')" ;>+7</button>
+			</li>
+			<li class="numbers"><img src="Assets/Images/kzt.jpg" width="20" height="10"> Казахстан -
+				<button class="numbers-change" id='number-change' onclick="changePhoneNumber('+997')" ;>+997</button>
+			</li>
+			<li class="numbers"><img src="Assets/Images/china.png" width="20" height="10"> Кітай -
+				<button class="numbers-change" id='number-change' onclick="changePhoneNumber('+86')" ;>+86</button>
+			</li>
+			<li class="numbers"><img src="Assets/Images/usa.png" width="20" height="10"> ЗША -
+				<button class="numbers-change" id='number-change' onclick="changePhoneNumber('+1')" ;>+1</button>
+			</li>
+			<li class="numbers"><img src="Assets/Images/Flag_of_France.svg" width="20" height="10"> Францыя -
+				<button class="numbers-change" id='number-change' onclick="changePhoneNumber('+33')" ;>+33</button>
+			</li>
+		</ul>
+	</div>
+	<script type="text/javascript" src="JS/filterModule.js"></script>
+	<div class="product-cat">
+		<div class="categoryButtons">
+			<div class="categoryButton">
+				<button class="category-text-button">Фота і відэакамеры</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Аксэсуары для смартфонаў</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Навушнікі і аудыётэхніка</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Кабелі і зарадныя прылады</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Разумная хата і бяспека</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Офісная тэхніка</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Смарт-гадзіны і фітнес-бранзалеты</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Сеткавае абсталяванне</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Сонечныя электрастанцыі і камплектуючыя</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Дзіцячая электроніка</button>
+			</div>
+			<div class="categoryButton">
+				<button class="category-text-button">Іншае</button>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript" src="JS/catigoryProductsModule.js"></script>
+	<main>
+		<div class='product-container' id="7112124251975475">
+			<div class="product">
+				<button class="redirecter" onclick="redirectToProductInfo(0)"><img alt="Product" width="200" height="250" src="Assets/Images/Products/cover1.jpg"></button>
+				<figcaption style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><a><b class="productCostA">21.51</b></a> </figcaption>
+				<figcaption style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Чахол Samsung Galaxy S7 Edge</figcaption>
+				<figcaption>★<b>5.0</b> · <b>0</b> водгуку(ов)</figcaption>
+				<button onclick="addToBasketFn(0);" data-id="7112124251975475" data-product-name="Чахол Samsung Galaxy S7 Edge Слон" data-product-price="21.51" data-product-quantity="1" data-product-img="Assets/Images/Products/cover1.jpg" class="buy-product-button" data-value-inshop="16" delivery="Бясплатная"> <a>Дабавить у кошык
+                    </a> </button>
+			</div>
+		</div>
+		<script type="text/javascript" src="JS/redirectToProductPage.js"></script>
+		<script type="text/javascript" src="JS/addToBasketModule.js"></script>
+	</main>
+	<footer>
+		<div class="footer-info">
+			<div class="footer-info-top">
+				<div class="footer-info-top-company">
+					<h2>Кампанія</h2>
+					<ul>
+						<li><a href="main.html#about-us">Пра нас</a></li>
+						<li><a href="main.html#about-company">Аб кампаніі</a></li>
+						<li><a href="main.html#promo">Прамакоды</a></li>
+					</ul>
+				</div>
+				<div class="footer-info-top-buyer">
+					<h2>Пакупнікам</h2>
+					<ul>
+						<li><a href="main.html#payments-metod">Спосабы аплаты</a></li>
+						<li><a href="main.html#how-to-buy__delivery">Дастаўка</a></li>
+						<li><a href="main.html#how-to-buy__delivery">Як купляць</a></li>
+						<li><a href="main.html#product-return">Зварот тавара</a></li>
+						<li><a href="main.html#money-return">Зварот сродкаў</a></li>
+					</ul>
+				</div>
+			</div>
+			<div class="footer-info-left">
+				<ul class="footer-info-list">
+					<li class="footer-info-item" data-text="strAddressInfo">ТАА «ІМВБРБ», г. Мінск, вул. Марвінава 10m, памяшканне 10, офіс 13</li>
+					<li class="footer-info-item" data-text="strAddressInfoByUPN">127253, Масква, пр-д Ліяназоўскі, дом 6, паверх 3, памяшканне 6, ТАА "ІНТЭЛ-РУАЛ", Крывенка Арцём Барысавічаў дзяржаўнай рэгістрацыі юрыдычнай асобы выдадзена ад 01.07.2022 г. №127253) </li>
+					<li class="footer-info-item" data-text="strDateOfInclusion"> Дата ўключэння звестак аб інтэрнэт-краме ў Гандлёвы рэестр Рэспублікі Беларусь 01.07.2022</li>
+					<li class="footer-info-item"> <span data-text="strTelephoneToCall">Тэлефон для сувязі: </span> <a data-tag="phoneToCall" data-text="strTelephoneToCallTel" href="Номер телфона:+375173886000">+7 (727) 338‒36‒96</a> </li>
+					<li class="footer-info-item" data-text="strSchedule">Рэжым працы: 9:00-19:00 (Мясцовы час GMT+3)</li>
+					<li class="footer-info-item" data-text="strPost">Спосаб дастаўкі: Еўрапошта</li>
+				</ul>
+			</div>
+			<div class="footer-info-right">
+				<ul class="footer-info-list">
+					<li class="footer-info-item"> <span data-text="strConsumerRights">Асоба, упаўнаважаная прадаўцом разглядаць звароты пакупнікоў аб парушэнні іх правоў, прадугледжаных заканадаўствам аб абароне правоў спажыўцоў - Алена Макарава, тэл. </span> <a data-tag="phoneConsumer" data-text="strConsumerRightsTel" href="tel:+77273883696">+7 (727) 338‒36‒96</a> </li>
+					<li class="footer-info-item" data-text="strListUsefulPhoneNumbers"> Нумары гарадскіх тэлефонаў упаўнаважаных па абароне правоў спажыўцоў:</li>
+					<li class="footer-info-item"> <a data-tag="phoneAdministration" data-text="strAdministrationInfoTel" href="tel:+74999952107">+7 499 995 2107</a> <span data-text="strAdministrationInfo">- адміністрацыя офіса</span> </li>
+					<li class="footer-info-item"> <span data-text="strProcessingClaims">
+Па афармленні вяртання, звяжыцеся з намі па электроннай пошце:</span> <a data-tag="processingClaimsMail" data-text="strProcessingClaimsMail" href="mailto:shop@fetaly.by">shop@belmarwin.by</a> </li>
+				</ul>
+			</div>
+			<div class="footer-c" data-tag="copyrightShort">2023 © Belmarwin</div>
+		</div>
+	</footer>
+</body>
+
+</html>
