@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<!--const newUrl = '/new-url';
+const newTitle = 'New Page Title';
+const newStateObj = { foo: 'bar' };
+window.history.pushState(newStateObj, newTitle, newUrl);-->
+<head>
+	<title>Fetaly</title>
+	<link rel="stylesheet" type="text/css" href="CSS/style.css"> 
+	<link rel="stylesheet" type="text/css" href="CSS/product.css"> 
+	<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+	<script type="text/javascript">
+		function googleTranslateElementInit() {
+			new google.translate.TranslateElement({
+				pageLanguage: 'be'
+			}, 'google_translate_element');
+		}
+	</script>
+	<div id="google_translate_element" style="display: none"></div>
+	<script>
+		var cookieString = document.cookie;
+		var cookies = cookieString.split(";");
+		var select = document.querySelector("#google_translate_element select");
+		var languageCookie = cookies.find(function(cookie) {
+		  return cookie.trim().startsWith("language=");
+		});
+		var languagePreference = languageCookie.split("=")[1];
+		select.value = languagePreference;
+
+	</script>
+	<header>
+		<div class="main_head_container">
+			<div class="main_head_logo">
+				<button id="showCatigoryButton" onclick="showCatigoryContainer();"><img width="150" height="90" src="Assets/Images/Logo.png" alt="Fetaly"> </button>
+			</div>
+			<div class="user-log">
+				<a href="main.html">
+					<button id="showCatigoryButton"><img alt="Log-in" src="Assets/Images/Log-in.png" width="30px; 30px;"></button>
+				</a>
+				<figcaption><a href="main.html">Мяню</a></figcaption>
+			</div>
+		</div>
+	</header>
+	<main>
+		<div style="display: none" id="prd_container"></div>
+		<div class="productDescription__Div">
+			<div class="productDescription__Im">
+				<figure class="productDescription__ImeFigure">
+					<img src="Assets/Images/Products/cover2.jpg" width="300" height="300">
+				</figure>
+				<div class="product__Description">
+					<label for="id">ID Тавару: </label>
+					<label for="name">Тавар: </label>
+					<label for="cost">Цана: </label>
+					<label for="seller">Прадавец: Marwin</label>
+					<label for="inShop">Тавараў у наяўнасці: </label>
+					<label for="location">Месца дастаўкі: Любое месца выдачы</label>
+					<label for="delivery_cost">Кошт дастаўкі: </label>
+				</div>
+			</div>
+		</div>
+	</main>
+	<script>
+		const urlParams = new URLSearchParams(window.location.search);
+		const idUrl = urlParams.get('id');
+	</script>
+	<script>
+		$('#prd_container').load(`index.html #${idUrl}`, function() {
+			let loadProducts = document.getElementsByClassName("product-container").item(0);
+			let place = "";
+			let image = loadProducts.querySelector(".redirecter img").getAttribute("scr");
+			let cost = loadProducts.querySelector(".buy-product-button").getAttribute("data-product-price");
+			let productName = loadProducts.querySelector(".buy-product-button").getAttribute("data-product-name");
+			let valueProducts = loadProducts.querySelector(".buy-product-button").getAttribute("data-value-inshop");
+			let delivery = loadProducts.querySelector(".buy-product-button").getAttribute("delivery");
+			let desc = document.querySelector(".product__Description");
+			document.getElementsByClassName("productDescription__ImeFigure").item(0).querySelector("img").setAttribute("src", image)
+			desc.querySelector("label[for='id']").textContent += idUrl;
+			desc.querySelector("label[for='cost']").textContent += cost;
+			desc.querySelector("label[for='name']").textContent += productName;
+			desc.querySelector("label[for='inShop']").textContent += valueProducts;
+			desc.querySelector("label[for='delivery_cost']").textContent += delivery;
+		});
+	</script>
+	<footer>
+		<div class="footer-info">
+			<div class="footer-info-top">
+				<div class="footer-info-top-company">
+					<h2>Кампанія</h2>
+					<ul>
+						<li><a href="main.html#about-us">Пра нас</a></li>
+						<li><a href="main.html#about-company">Аб кампаніі</a></li>
+					</ul>
+				</div>
+				<div class="footer-info-top-buyer">
+					<h2>Пакупнікам</h2>
+					<ul>
+						<li><a href="main.html#payments-metod">Спосабы аплаты</a></li>
+						<li><a href="main.html#how-to-buy__delivery">Дастаўка</a></li>
+						<li><a href="main.html#how-to-buy__delivery">Як купляць</a></li>
+						<li><a href="main.html#product-return">Зварот тавара</a></li>
+						<li><a href="main.html#money-return">Зварот сродкаў</a></li>
+					</ul>
+				</div>
+			</div>
+			<div class="footer-info-left">
+				<ul class="footer-info-list">
+					<li class="footer-info-item" data-text="strAddressInfo">ТАА «ІМВБРБ», г. Мінск, вул. Марвінава 10m, памяшканне 10, офіс 13</li>
+					<li class="footer-info-item" data-text="strAddressInfoByUPN">127253, Масква, пр-д Ліяназоўскі, дом 6, паверх 3, памяшканне 6, ТАА "ІНТЭЛ-РУАЛ", Крывенка Арцём Барысавічаў дзяржаўнай рэгістрацыі юрыдычнай асобы выдадзена ад 01.07.2022 г. №127253) </li>
+					<li class="footer-info-item" data-text="strDateOfInclusion"> Дата ўключэння звестак аб інтэрнэт-краме ў Гандлёвы рэестр Рэспублікі Беларусь 01.07.2022</li>
+					<li class="footer-info-item"> <span data-text="strTelephoneToCall">Тэлефон для сувязі: </span> <a data-tag="phoneToCall" data-text="strTelephoneToCallTel" href="Номер телфона:+375173886000">+7 (727) 338‒36‒96</a> </li>
+					<li class="footer-info-item" data-text="strSchedule">Рэжым працы: 9:00-19:00 (Мясцовы час GMT+3)</li>
+					<li class="footer-info-item" data-text="strPost">Спосаб дастаўкі: Еўрапошта</li>
+				</ul>
+			</div>
+			<div class="footer-info-right">
+				<ul class="footer-info-list">
+					<li class="footer-info-item"> <span data-text="strConsumerRights">Асоба, упаўнаважаная прадаўцом разглядаць звароты пакупнікоў аб парушэнні іх правоў, прадугледжаных заканадаўствам аб абароне правоў спажыўцоў - Алена Макарава, тэл. </span> <a data-tag="phoneConsumer" data-text="strConsumerRightsTel" href="tel:+77273883696">+7 (727) 338‒36‒96</a> </li>
+					<li class="footer-info-item" data-text="strListUsefulPhoneNumbers"> Нумары гарадскіх тэлефонаў упаўнаважаных па абароне правоў спажыўцоў:</li>
+					<li class="footer-info-item"> <a data-tag="phoneAdministration" data-text="strAdministrationInfoTel" href="tel:+74999952107">+7 499 995 2107</a> <span data-text="strAdministrationInfo">- адміністрацыя офіса</span> </li>
+					<li class="footer-info-item"> <span data-text="strProcessingClaims">
+Па афармленні вяртання, звяжыцеся з намі па электроннай пошце:</span> <a data-tag="processingClaimsMail" data-text="strProcessingClaimsMail" href="mailto:shop@fetaly.by">shop@belmarwin.by</a> </li>
+				</ul>
+			</div>
+			<div class="footer-c" data-tag="copyrightShort">2023 © Belmarwin</div>
+		</div>
+	</footer>
+</body>
+
+</html>
